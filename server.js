@@ -67,6 +67,8 @@ app.post('api/exercise/new-user', function(req,res,done){
         if(err) done(err);
         done(null,data);
       });
+      res.send({Username: req.body.username, _id: id});
+      id++;
     }
     else
     {
