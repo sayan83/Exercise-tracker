@@ -5,7 +5,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 
 const mongoose = require('mongoose')
-mongoose.connect(process.env.MLAB_URI || 'mongodb://localhost/exercise-track' )
+mongoose.connect(process.env.MLAB_URI)
 
 app.use(cors())
 
@@ -43,6 +43,38 @@ app.use((err, req, res, next) => {
     .send(errMessage)
 })
 
+var sch = new mongoose.Schema({
+  _id: Number,
+  Username: String,
+  count: Number,
+  log: [
+    {
+      description: String,
+      duration: Number,
+      dt: {type: Date, Default: Date.now},
+    }
+  ],
+});
+var data = mongoose.model('Exc-data',sch);
+var id=1;
+app.post('api/exercise/new-user', function(req,res,done){
+  data.findOne({Username: req.body.username},function(err,data){
+    if (err) done(err);
+    if(data == null)
+    {
+      var document = new data({_id: id,Username: req.body.username, count: 0});
+      document.save(function(err,data){
+        if(err) done(err);
+        done(null,data);
+      });
+    }
+    else
+    {
+     res.send('username already taken'); 
+    }
+  });
+});
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log('Your app is listening on port ' + listener.address().port)
 })
+
